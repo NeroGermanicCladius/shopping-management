@@ -1,4 +1,4 @@
-package com.example.domain;
+package com.example.model.domain;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -29,14 +29,13 @@ public class Rating {
     @Column(name = "rate", nullable = false)
     private Integer rate;
 
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
             name = "user_id",
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "tb_rating_user_id_fk")
     )
-    private User userId;
+    private User user;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
@@ -44,17 +43,17 @@ public class Rating {
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "tb_rating_product_id_fk")
     )
-    private Product productId;
+    private Product product;
 
     public Rating() {
         this(null, null, null, null);
     }
 
-    public Rating(final Long id, final Integer rate, final User userId, final Product productId) {
+    public Rating(final Long id, final Integer rate, final User user, final Product product) {
         this.id = id;
         this.rate = rate;
-        this.userId = userId;
-        this.productId = productId;
+        this.user = user;
+        this.product = product;
     }
 
     @Override
@@ -64,13 +63,13 @@ public class Rating {
         Rating product = (Rating) o;
         return Objects.equals(id, product.id) &&
                 Objects.equals(rate, product.rate) &&
-                Objects.equals(userId, product.userId) &&
-                Objects.equals(productId, product.productId);
+                Objects.equals(user, product.user) &&
+                Objects.equals(product, product.product);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, rate, userId, productId);
+        return Objects.hash(id, rate, user, product);
     }
 
     @Override
@@ -78,8 +77,8 @@ public class Rating {
         return "Rating{" +
                 "id=" + id +
                 ", rate='" + rate + '\'' +
-                ", userId=" + userId + '\'' +
-                ", productId=" + productId + '\'' +
+                ", userId=" + user + '\'' +
+                ", productId=" + product + '\'' +
                 '}';
     }
 }

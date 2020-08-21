@@ -22,7 +22,7 @@ public class SwaggerConfig {
                 .groupName("public-api")
                 .apiInfo(apiInfo())
                 .select()
-                .paths(regex("/api/.*"))
+                .paths(regex("/api/v1.*"))
                 .build()
                 .securitySchemes(Collections.singletonList(new BasicAuth("basicAuth")));
     }
@@ -31,7 +31,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title("Shopping Management API")
                 .description("Shopping Management API reference for developers")
-                .version("1.0")
+                .version("1.0.0")
                 .build();
     }
 }

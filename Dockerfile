@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk-alpine:11.0.7-jre
+FROM azul/zulu-openjdk-alpine:11.0.8-jre
 
 ADD target/shopping-management.jar /target.jar
 

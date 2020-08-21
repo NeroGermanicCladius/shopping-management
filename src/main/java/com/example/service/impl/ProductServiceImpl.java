@@ -1,9 +1,10 @@
 package com.example.service.impl;
 
 
-import com.example.domain.Product;
-import com.example.domain.create.ProductCreationModel;
-import com.example.domain.dto.ProductDto;
+import com.example.exceptions.NotImplementedException;
+import com.example.model.domain.Product;
+import com.example.model.dto.ProductCreationRequestDto;
+import com.example.model.dto.ProductDto;
 import com.example.exceptions.ResourceAlreadyExistsException;
 import com.example.exceptions.ResourceNotFoundException;
 import com.example.repository.ProductRepository;
@@ -26,7 +27,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public Product create(final ProductCreationModel creationRequest) {
+    public Product create(final ProductCreationRequestDto creationRequest) {
         final String name = creationRequest.getName();
         final Optional<Product> productOpt = productRepository.findByName(name);
         if (productOpt.isPresent()) {
@@ -50,12 +51,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public Product update(Product productDto) {
-        Optional<Product> updateProduct = productRepository.findById(productDto.getId());
-        if (updateProduct.isEmpty()) {
-            throw ResourceNotFoundException.createInstance(Product.class, "id:" + productDto.getId());
-        }
+        final Product product = get(productDto.getId());
 
-        final Product product = updateProduct.get();
         product.setName(productDto.getName());
         product.setPrice(productDto.getPrice());
         product.setOverview(productDto.getOverview());
@@ -65,12 +62,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public Optional<Product> delete(Long id) {
-        Optional<Product> product = productRepository.findById(id);
-        if (product.isEmpty()) {
-            throw ResourceNotFoundException.createInstance(Product.class, "id:" + id);
-        }
-
+    public Product delete(Long id) {
+        final Product product = get(id);
         productRepository.deleteById(id);
         return product;
     }
@@ -78,13 +71,33 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public List<Product> filteringData(ProductDto filter) {
-        return productRepository.getFilteredData(filter);
+        final List<Product> filteredData = productRepository.getFilteredData(filter);
+
+        if (true) {
+            throw new NotImplementedException("12 hours, you know...");
+        }
+
+        return filteredData;
     }
 
     @Override
-    public Product get(Long productId) {
-        return productRepository
-                .findById(productId)
-                .orElseThrow(() -> ResourceNotFoundException.createInstance(Product.class, "id:" + productId));
+    @Transactional(readOnly = true)
+    public Product get(Long id) {
+        return find(id)
+                .orElseThrow(() -> ResourceNotFoundException.createInstance(Product.class, "id:" + id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Product> find(Long id) {
+        return productRepository.findById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void makeSureProductExists(Long id) {
+        if (find(id).isEmpty()) {
+            throw ResourceNotFoundException.createInstance(Product.class, "id:" + id);
+        }
     }
 }

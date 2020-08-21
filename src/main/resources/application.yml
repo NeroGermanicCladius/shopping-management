@@ -5,9 +5,15 @@ spring:
     url: ${postgres.url:jdbc:postgresql://localhost:5432/postgres?currentSchema=public}
     username: ${postgres.username:root}
     password: ${postgres.password:root}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
-  flyway:
-    enabled: true
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+shop:
+  security:
+    auth-token-key: jwt-auth-token
+    jwt-secret: ${jwt-secret:gi3eVLofpySHD0iCvJUN}
+    expiration-millis: ${jwt-expiration-millis:28799000}
+    cors-allow-all-pattern: ${cors-allow-all-pattern:/**}

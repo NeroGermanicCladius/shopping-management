@@ -15,7 +15,6 @@ services:
       - postgres.url=jdbc:postgresql://shopping-postgres:5432/postgres?currentSchema=public
       - postgres.username=root
       - postgres.password=root
-      - jwt-expiration-millis=28799000
     ports:
       - "8080:8080"
     depends_on:

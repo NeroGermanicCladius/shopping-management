@@ -1,6 +1,6 @@
-package com.example.configuration;
+package com.example.configuration.security;
 
-import com.example.domain.User;
+import com.example.model.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,9 +8,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
-public class UserDetailsImpl implements UserDetails {
-    private static final String ROLE = "ROLE_";
-    private User user;
+public final class UserPrincipal implements UserDetails {
+
+    private final User user;
+
+    public UserPrincipal(final User user) {
+        this.user = user;
+    }
 
     public User getUser() {
         return user;
@@ -18,17 +22,17 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(ROLE + user.getType().toString()));
+        return Collections.singleton(new SimpleGrantedAuthority(this.user.getType().name()));
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return this.user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getName();
+        return this.user.getEmail();
     }
 
     @Override
@@ -48,6 +52,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.user.getIsActive();
     }
 }

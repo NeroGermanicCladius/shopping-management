@@ -1,4 +1,4 @@
-package com.example.mapper;
+package com.example.model.mapper;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;

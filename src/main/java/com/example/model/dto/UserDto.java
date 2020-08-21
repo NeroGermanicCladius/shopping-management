@@ -1,6 +1,6 @@
-package com.example.domain.dto;
+package com.example.model.dto;
 
-import com.example.domain.UserType;
+import com.example.model.domain.UserType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -25,7 +25,7 @@ public class UserDto {
             @JsonProperty("name") final String name,
             @JsonProperty("email") final String email,
             @JsonProperty("type") final UserType type,
-            @JsonProperty("isActive") final Boolean isActive
+            @JsonProperty("is_active") final Boolean isActive
     ) {
         this.id = id;
         this.name = name;

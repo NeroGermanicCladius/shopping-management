@@ -1,10 +1,10 @@
 package com.example.controller;
 
-import com.example.configuration.UserDetailsImpl;
-import com.example.domain.Product;
-import com.example.domain.Rating;
-import com.example.domain.User;
-import com.example.domain.create.RatingCreationModel;
+import com.example.configuration.security.UserPrincipal;
+import com.example.model.domain.Rating;
+import com.example.model.dto.RatingCreationRequestDto;
+import com.example.model.dto.RatingDto;
+import com.example.model.mapper.MapperUtils;
 import com.example.service.ProductService;
 import com.example.service.RatingService;
 import io.swagger.annotations.Api;
@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,11 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.Optional;
 
+@Validated
 @Api(value = "Rates", tags = "Rates")
 @RestController
-@RequestMapping("/api/rating")
+@RequestMapping("/api/v1/rating")
 public class RatingController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommentController.class);
     private final RatingService ratingService;
@@ -39,31 +39,22 @@ public class RatingController {
     }
 
     @ApiOperation(
-            value = "Add comment to concrete product",
-            nickname = "addComment",
+            value = "Add rate to concrete product",
+            nickname = "addRating",
             authorizations = {@Authorization(value = "basicAuth")})
-    @PostMapping("/addComment")
-    public ResponseEntity<Rating> rateProduct(
-            @Valid @NotNull @RequestBody final RatingCreationModel model) {
+    @PostMapping("/addRating")
+    public ResponseEntity<RatingDto> rateProduct(
+            @Valid @NotNull @RequestBody final RatingCreationRequestDto creationRequestDto,
+            final UserPrincipal principal) {
         LOGGER.debug("Rating product");
 
-        Optional<Product> product = Optional.ofNullable(productService.get(model.getProductId()));
-        if (!product.isPresent()) {
-            LOGGER.debug("Not found concrete product");
-            return ResponseEntity.notFound().build();
-        }
+        productService.makeSureProductExists(creationRequestDto.getProductId());
 
-        User creator =
-                ((UserDetailsImpl) SecurityContextHolder
-                        .getContext()
-                        .getAuthentication()
-                        .getPrincipal())
-                        .getUser();
+        creationRequestDto.setUserId(principal.getUser().getId());
+        final Rating rating = ratingService.rateProduct(creationRequestDto);
+        final RatingDto ratingDto = MapperUtils.map(rating, RatingDto.class);
 
-        model.setUserId(creator.getId());
-        Rating rating = ratingService.rateProduct(model);
-
-        LOGGER.debug("Done getting concrete comment");
-        return ResponseEntity.ok(rating);
+        LOGGER.debug("Done getting concrete rating");
+        return ResponseEntity.ok(ratingDto);
     }
 }

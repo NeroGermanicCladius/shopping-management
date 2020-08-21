@@ -1,4 +1,4 @@
-package com.example.domain.dto;
+package com.example.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,10 +14,9 @@ public class ProductDto {
     private String name;
     private BigDecimal price;
     private String overview;
-    private BigDecimal rating;
 
     public ProductDto() {
-        this(null, null, null, null, null);
+        this(null, null, null, null);
     }
 
     @JsonCreator
@@ -25,13 +24,11 @@ public class ProductDto {
             @JsonProperty("id") final Long id,
             @JsonProperty("name") final String name,
             @JsonProperty("price") final BigDecimal price,
-            @JsonProperty("overview") final String overview,
-            @JsonProperty("rating") final BigDecimal rating
+            @JsonProperty("overview") final String overview
     ) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.overview = overview;
-        this.rating = rating;
     }
 }

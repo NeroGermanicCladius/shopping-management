@@ -1,12 +1,10 @@
 package com.example.controller;
 
-import com.example.configuration.UserDetailsImpl;
-import com.example.domain.Comment;
-import com.example.domain.Product;
-import com.example.domain.User;
-import com.example.domain.create.CommentCreationModel;
-import com.example.domain.dto.CommentDto;
-import com.example.mapper.MapperUtils;
+import com.example.configuration.security.UserPrincipal;
+import com.example.model.domain.Comment;
+import com.example.model.dto.CommentCreationRequestDto;
+import com.example.model.dto.CommentDto;
+import com.example.model.mapper.MapperUtils;
 import com.example.service.CommentService;
 import com.example.service.ProductService;
 import io.swagger.annotations.Api;
@@ -16,17 +14,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Optional;
 
+@Validated
 @Api(value = "Comments", tags = "Comments")
 @RestController
-@RequestMapping("/api/comment")
+@RequestMapping("/api/v1/comment")
 public class CommentController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommentController.class);
     private final CommentService commentService;
@@ -43,13 +41,14 @@ public class CommentController {
             nickname = "getAllComments",
             authorizations = {@Authorization(value = "basicAuth")})
     @GetMapping("/all")
-    public ResponseEntity<List<Comment>> getAllProducts() {
+    public ResponseEntity<List<CommentDto>> getAllProducts() {
         LOGGER.debug("Getting all comments");
 
-        List<Comment> all = commentService.getAll();
+        final List<Comment> allComments = commentService.getAll();
+        final List<CommentDto> allCommentsDtos = MapperUtils.mapAll(allComments, CommentDto.class);
 
         LOGGER.info("Done getting all comments");
-        return ResponseEntity.ok(all);
+        return ResponseEntity.ok(allCommentsDtos);
     }
 
     @ApiOperation(
@@ -59,13 +58,9 @@ public class CommentController {
     @GetMapping("{id}")
     public ResponseEntity<CommentDto> get(@PathVariable @NotNull final Long id) {
         LOGGER.debug("Getting concrete comment");
-        Optional<Comment> commentById = Optional.ofNullable(commentService.getCommentById(id));
-        if (!commentById.isPresent()) {
-            LOGGER.debug("Not found concrete comment");
-            return ResponseEntity.notFound().build();
-        }
 
-        final CommentDto result = MapperUtils.map(commentById.get(), CommentDto.class);
+        final Comment comment = commentService.getCommentById(id);
+        final CommentDto result = MapperUtils.map(comment, CommentDto.class);
 
         LOGGER.debug("Done getting concrete comment");
         return ResponseEntity.ok(result);
@@ -76,28 +71,19 @@ public class CommentController {
             nickname = "addComment",
             authorizations = {@Authorization(value = "basicAuth")})
     @PostMapping("/addComment")
-    public ResponseEntity<Comment> addComment(
-            @Valid @NotNull @RequestBody final CommentCreationModel model) {
+    public ResponseEntity<CommentDto> addComment(
+            @Valid @NotNull @RequestBody final CommentCreationRequestDto creationRequestDto,
+            final UserPrincipal principal) {
         LOGGER.debug("Adding comment");
 
-        Optional<Product> product = Optional.ofNullable(productService.get(model.getProductId()));
-        if (!product.isPresent()) {
-            LOGGER.debug("Not found concrete product");
-            return ResponseEntity.notFound().build();
-        }
+        productService.makeSureProductExists(creationRequestDto.getProductId());
 
-        User creator =
-                ((UserDetailsImpl) SecurityContextHolder
-                        .getContext()
-                        .getAuthentication()
-                        .getPrincipal())
-                        .getUser();
+        creationRequestDto.setUserId(principal.getUser().getId());
 
-        model.setUserId(creator.getId());
-
-        Comment comment = commentService.addComment(model);
+        final Comment comment = commentService.addComment(creationRequestDto);
+        final CommentDto commentDto = MapperUtils.map(comment, CommentDto.class);
 
         LOGGER.debug("Done getting concrete comment");
-        return ResponseEntity.ok(comment);
+        return ResponseEntity.ok(commentDto);
     }
 }

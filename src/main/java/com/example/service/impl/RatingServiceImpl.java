@@ -1,9 +1,9 @@
 package com.example.service.impl;
 
-import com.example.domain.Product;
-import com.example.domain.Rating;
-import com.example.domain.User;
-import com.example.domain.create.RatingCreationModel;
+import com.example.model.domain.Product;
+import com.example.model.domain.Rating;
+import com.example.model.domain.User;
+import com.example.model.dto.RatingCreationRequestDto;
 import com.example.exceptions.ResourceNotFoundException;
 import com.example.repository.RateRepository;
 import com.example.service.ProductService;
@@ -23,7 +23,7 @@ public class RatingServiceImpl implements RatingService {
     private final UserService userService;
 
     @Autowired
-    public RatingServiceImpl(ProductService productService, RateRepository rateRepository, UserService userService) {
+    public RatingServiceImpl(final ProductService productService, final RateRepository rateRepository, final UserService userService) {
         this.productService = productService;
         this.rateRepository = rateRepository;
         this.userService = userService;
@@ -31,7 +31,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     @Transactional
-    public Rating rateProduct(RatingCreationModel model) {
+    public Rating rateProduct(RatingCreationRequestDto model) {
         Optional<Product> product = Optional.ofNullable(productService.get(model.getProductId()));
         if (product.isEmpty()) {
             throw ResourceNotFoundException.createInstance(Product.class, "id:" + model.getProductId());
@@ -40,9 +40,9 @@ public class RatingServiceImpl implements RatingService {
         User user = userService.get(model.getUserId());
 
         final Rating rating = new Rating();
-        rating.setProductId(product.get());
+        rating.setProduct(product.get());
         rating.setRate(model.getRate());
-        rating.setUserId(user);
+        rating.setUser(user);
 
         return rateRepository.save(rating);
     }

@@ -1,9 +1,9 @@
 package com.example.controller;
 
-import com.example.domain.User;
-import com.example.domain.create.UserCreationModel;
-import com.example.domain.dto.UserDto;
-import com.example.mapper.MapperUtils;
+import com.example.model.domain.User;
+import com.example.model.dto.UserCreationRequestDto;
+import com.example.model.dto.UserDto;
+import com.example.model.mapper.MapperUtils;
 import com.example.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -11,17 +11,17 @@ import io.swagger.annotations.Authorization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Optional;
 
+@Validated
 @Api(value = "Users", tags = "Users")
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/v1/user")
 public class UserController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
@@ -34,10 +34,10 @@ public class UserController {
             value = "Create a user.",
             nickname = "createUser")
     @PostMapping("/register")
-    public ResponseEntity<UserDto> registerUser(@Valid @NotNull @RequestBody final UserCreationModel userCreationRequestDto) {
+    public ResponseEntity<UserDto> registerUser(@Valid @NotNull @RequestBody final UserCreationRequestDto userCreationRequestDto) {
         LOGGER.debug("Registering User with email:{}", userCreationRequestDto.getEmail());
 
-        final UserCreationModel request = MapperUtils.map(userCreationRequestDto, UserCreationModel.class);
+        final UserCreationRequestDto request = MapperUtils.map(userCreationRequestDto, UserCreationRequestDto.class);
         final User createdUser = userService.create(request);
         final UserDto result = MapperUtils.map(createdUser, UserDto.class);
 
@@ -45,16 +45,15 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @ApiOperation(
             value = "Get all users.",
             nickname = "getAllUsers",
             authorizations = {@Authorization(value = "basicAuth")})
-    @GetMapping
+    @GetMapping("/getAll")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         LOGGER.debug("Getting all users");
 
-        List<UserDto> userDtos = MapperUtils.mapAll(userService.findAll(), UserDto.class);
+        final List<UserDto> userDtos = MapperUtils.mapAll(userService.findAll(), UserDto.class);
 
         LOGGER.info("Done getting all users");
         return ResponseEntity.ok(userDtos);
@@ -64,74 +63,59 @@ public class UserController {
             value = "Get a user by id.",
             nickname = "getUserById",
             authorizations = {@Authorization(value = "basicAuth")})
-    @GetMapping("{id}")
-    public ResponseEntity<UserDto> get(@PathVariable @NotNull final Long id) {
+    @GetMapping("/get")
+    public ResponseEntity<UserDto> get(@RequestParam @NotNull final Long id) {
         LOGGER.debug("Getting concrete user");
-        Optional<User> user = Optional.ofNullable(userService.get(id));
-        if (!user.isPresent()) {
-            LOGGER.debug("Not found concrete user");
-            return ResponseEntity.notFound().build();
-        }
-        final UserDto result = MapperUtils.map(user.get(), UserDto.class);
+
+        final User user = userService.get(id);
+        final UserDto userDto = MapperUtils.map(user, UserDto.class);
 
         LOGGER.debug("Done getting concrete user");
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(userDto);
     }
 
-    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @ApiOperation(
             value = "Block a concrete user.",
             nickname = "blockUser",
             authorizations = {@Authorization(value = "basicAuth")})
-    @PostMapping("{id}")
-    public ResponseEntity<UserDto> blockUser(@PathVariable @NotNull final Long id) {
+    @PostMapping("/block")
+    public ResponseEntity<UserDto> blockUser(@RequestParam @NotNull final Long id) {
         LOGGER.debug("Blocking concrete user");
 
-        Optional<User> user = Optional.ofNullable(userService.blockUser(id));
-        if (!user.isPresent()) {
-            LOGGER.debug("Not found concrete user");
-            return ResponseEntity.notFound().build();
-        }
+        final User blockedUser = userService.blockUser(id);
+        final UserDto blockedUserDto = MapperUtils.map(blockedUser, UserDto.class);
 
         LOGGER.debug("Done blocking concrete user");
-        return ResponseEntity.ok(MapperUtils.map(user.get(), UserDto.class));
+        return ResponseEntity.ok(blockedUserDto);
     }
 
-    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @ApiOperation(
             value = "Unblock a concrete user.",
             nickname = "unblockUser",
             authorizations = {@Authorization(value = "basicAuth")})
-    @PostMapping("{id}")
-    public ResponseEntity<UserDto> unblockUser(@PathVariable @NotNull final Long id) {
+    @PostMapping("/unblock")
+    public ResponseEntity<UserDto> unblockUser(@RequestParam @NotNull final Long id) {
         LOGGER.debug("Blocking concrete user");
 
-        Optional<User> user = Optional.ofNullable(userService.unblockUser(id));
-        if (!user.isPresent()) {
-            LOGGER.debug("Not found concrete user");
-            return ResponseEntity.notFound().build();
-        }
+        final User unblockedUser = userService.unblockUser(id);
+        final UserDto unblockedUserDto = MapperUtils.map(unblockedUser, UserDto.class);
 
         LOGGER.debug("Done unblocking concrete user");
-        return ResponseEntity.ok(MapperUtils.map(user.get(), UserDto.class));
+        return ResponseEntity.ok(unblockedUserDto);
     }
 
-    @PreAuthorize("hasRole('ROLE_MANAGER')")
     @ApiOperation(
             value = "Delete a user.",
             nickname = "deleteUser",
             authorizations = {@Authorization(value = "basicAuth")})
-    @DeleteMapping("{id}")
-    public ResponseEntity<UserDto> delete(@PathVariable @NotNull final Long id) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<UserDto> delete(@RequestParam @NotNull final Long id) {
         LOGGER.debug("Deleting concrete user");
 
-        Optional<User> user = userService.delete(id);
-        if (!user.isPresent()) {
-            LOGGER.debug("Not found concrete user");
-            return ResponseEntity.notFound().build();
-        }
+        final User deletedUser = userService.delete(id);
+        final UserDto deletedUserDto = MapperUtils.map(deletedUser, UserDto.class);
 
         LOGGER.debug("Done deleting concrete user");
-        return ResponseEntity.ok(MapperUtils.map(user.get(), UserDto.class));
+        return ResponseEntity.ok(deletedUserDto);
     }
 }

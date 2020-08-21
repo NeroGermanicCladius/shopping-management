@@ -1,9 +1,9 @@
 package com.example.service.impl;
 
-import com.example.domain.Comment;
-import com.example.domain.Product;
-import com.example.domain.User;
-import com.example.domain.create.CommentCreationModel;
+import com.example.model.domain.Comment;
+import com.example.model.domain.Product;
+import com.example.model.domain.User;
+import com.example.model.dto.CommentCreationRequestDto;
 import com.example.exceptions.ResourceNotFoundException;
 import com.example.repository.CommentRepository;
 import com.example.repository.ProductRepository;
@@ -24,7 +24,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserService userService;
 
     @Autowired
-    public CommentServiceImpl(final ProductRepository productService, final CommentRepository commentRepository, UserService userService) {
+    public CommentServiceImpl(final ProductRepository productService, final CommentRepository commentRepository, final UserService userService) {
         this.productService = productService;
         this.commentRepository = commentRepository;
         this.userService = userService;
@@ -32,7 +32,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment addComment(CommentCreationModel model) {
+    public Comment addComment(CommentCreationRequestDto model) {
         Optional<Product> product = productService.findById(model.getProductId());
         if (product.isEmpty()) {
             throw ResourceNotFoundException.createInstance(Product.class, "id:" + model.getProductId());
@@ -42,8 +42,8 @@ public class CommentServiceImpl implements CommentService {
 
         final Comment comment = new Comment();
         comment.setCommentText(model.getCommentText());
-        comment.setProductId(product.get());
-        comment.setUserId(user);
+        comment.setProduct(product.get());
+        comment.setUser(user);
 
         return commentRepository.save(comment);
     }

@@ -1,12 +1,12 @@
 package com.example.service;
 
-import com.example.domain.Comment;
-import com.example.domain.create.CommentCreationModel;
+import com.example.model.domain.Comment;
+import com.example.model.dto.CommentCreationRequestDto;
 
 import java.util.List;
 
 public interface CommentService {
-    Comment addComment(CommentCreationModel comment);
+    Comment addComment(CommentCreationRequestDto comment);
 
     List<Comment> getAll();
 

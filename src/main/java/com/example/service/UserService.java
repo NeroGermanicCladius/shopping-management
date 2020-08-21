@@ -1,16 +1,16 @@
 package com.example.service;
 
-import com.example.domain.User;
-import com.example.domain.create.UserCreationModel;
+import com.example.model.domain.User;
+import com.example.model.dto.UserCreationRequestDto;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
 
     User get(Long userId);
 
-    User create(UserCreationModel request);
+    User create(UserCreationRequestDto request);
 
     List<User> findAll();
 
@@ -18,5 +18,5 @@ public interface UserService {
 
     User unblockUser(Long userId);
 
-    Optional<User> delete(Long userId);
+    User delete(Long userId);
 }

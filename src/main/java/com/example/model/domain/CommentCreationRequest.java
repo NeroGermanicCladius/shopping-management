@@ -1,20 +1,20 @@
-package com.example.domain.create;
+package com.example.model.domain;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class CommentCreationModel {
+public class CommentCreationRequest {
     private String commentText;
     private Long userId;
     private Long productId;
 
-    public CommentCreationModel() {
+    public CommentCreationRequest() {
         this(null, null, null);
     }
 
-    public CommentCreationModel(
+    public CommentCreationRequest(
             final String commentText,
             final Long userId,
             final Long productId

@@ -1,22 +1,21 @@
-package com.example.domain.create;
+package com.example.model.domain;
 
-import com.example.domain.UserType;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class UserCreationModel {
+public class UserCreationRequest {
     private String name;
     private String email;
     private UserType type;
     private String password;
 
-    public UserCreationModel() {
+    public UserCreationRequest() {
         this(null, null, null, null);
     }
 
-    public UserCreationModel(
+    public UserCreationRequest(
             final String name,
             final String email,
             final UserType type,

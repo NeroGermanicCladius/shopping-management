@@ -1,4 +1,4 @@
-package com.example.domain.dto;
+package com.example.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,25 +7,25 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CommentDto {
+public class RatingDto {
     private Long id;
-    private String commentText;
+    private Integer rate;
     private Long userId;
     private Long productId;
 
-    public CommentDto() {
+    public RatingDto() {
         this(null, null, null, null);
     }
 
     @JsonCreator
-    public CommentDto(
+    public RatingDto(
             @JsonProperty("id") final Long id,
-            @JsonProperty("commentText") final String commentText,
+            @JsonProperty("rate") final Integer rate,
             @JsonProperty("userId") final Long userId,
             @JsonProperty("productId") final Long productId
     ) {
         this.id = id;
-        this.commentText = commentText;
+        this.rate = rate;
         this.userId = userId;
         this.productId = productId;
     }
