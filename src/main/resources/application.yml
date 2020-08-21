@@ -1,0 +1,13 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: ${postgres.url:jdbc:postgresql://localhost:5432/postgres?currentSchema=public}
+    username: ${postgres.username:root}
+    password: ${postgres.password:root}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true

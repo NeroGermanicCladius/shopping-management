@@ -1,0 +1,22 @@
+version: "3"
+services:
+  shopping-postgres:
+    image: postgres:10.13-alpine
+    container_name: shopping-postgres
+    hostname: shopping-postgres
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+  shopping-management:
+    image: shopping-management:only
+    container_name: shopping-management
+    hostname: shopping-management
+    environment:
+      - postgres.url=jdbc:postgresql://shopping-postgres:5432/postgres?currentSchema=public
+      - postgres.username=root
+      - postgres.password=root
+      - jwt-expiration-millis=28799000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - shopping-postgres
